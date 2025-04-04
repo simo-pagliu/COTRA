@@ -3,8 +3,11 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 
 # List of files to compare and their comments
-files = ["output_data.npz", "output_data_1.npz"]
-comments = ["Linear Retardation", "No Retardation"]
+files = ["output_data_1.npz", "output_data_2.npz", "output_data_3.npz", "output_data_4.npz"]
+comments = ["No Retardation + x10 Hyd.Dispersion",
+            "No Retardation",
+            "Linear Retardation",
+            "Linear Retardation + x10 Hyd.Dispersion"]
 
 # List to hold the loaded data
 data_list = []

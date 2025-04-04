@@ -7,7 +7,7 @@ import glob
 import re
 
 # Input Parameters
-Hydro_Dispersion = 3.3e-7       # Hydrodynamic dispersion [m^2/s]
+Hydro_Dispersion = 3.3e-6       # Hydrodynamic dispersion [m^2/s]
 pore_velocity = 1.0e-4          # Pore velocity [m/s]
 porosity = 0.30                 # Porosity
 bulk_density = 4                # Bulk density [kg/l]
@@ -34,7 +34,7 @@ Concentration_Init = np.zeros(Steps_Space)
 Concentration_Init[0] = Source_Intensity
 
 # Retardation settings (example, adjust as needed)
-retardation = 0  # Options: 0, 1, or 2
+retardation = 1  # Options: 0, 1, or 2
 k_1 = 0.1
 k_2 = 0.2
 
@@ -60,20 +60,55 @@ def pde_rhs(t, C, source_active=True):
     # Compute the right-hand side of the PDE
     dC_dt = (-pore_velocity * dC_dx + Hydro_Dispersion * d2C_dx2) / R
 
+    # Left boundary condition (Dirichlet)
     # If the source is active, enforce the boundary condition at x=0.
     # Here we simply force the derivative at the first node to be zero so that the value remains constant.
     if source_active:
         C[0] = Source_Intensity  # This holds C[0] constant
+        dC_dt[0]=0
     else:
         C[0] = 0 
+        dC_dt[0]=0
+
+    # Right boundary condition (Neumann)
+    dC_dt[-1] = 0  # No flux at the right boundary (Neumann condition)
+    #C[-1] = C[-2]  # This holds C[-1] constant
     return dC_dt
+
+def pde_rhs(t, C, source_active=True):
+    C_ext = np.zeros(Steps_Space + 2)
+    C_ext[1:-1] = C
+    C_ext[0] = C[1]  # Neumann at x=0 if no source, will be overridden if source_active
+    C_ext[-1] = C[-2]  # Neumann at x=L
+
+    dC_dx = (C_ext[2:] - C_ext[:-2]) / (2 * dx)
+    d2C_dx2 = (C_ext[2:] - 2 * C_ext[1:-1] + C_ext[:-2]) / (dx ** 2)
+
+    if retardation == 1:
+        R = 1 + k_1 * bulk_density / porosity
+    elif retardation == 2:
+        R = 1 + k_1 * bulk_density / porosity * (C ** (k_2 - 1))
+    else:
+        R = 1.0
+
+    dC_dt = (-pore_velocity * dC_dx + Hydro_Dispersion * d2C_dx2) / R
+
+    if source_active:
+        dC_dt[0] = 0  # Hold C[0] fixed
+        C[0] = Source_Intensity
+    else:
+        dC_dt[0] = 0
+        C[0] = 0
+
+    return dC_dt
+
 
 # First stage: with source active (t from 0 to Source_Time)
 t_span1 = (Time_Span[0], Source_Time)
 t_eval1 = Grid_Time[Grid_Time <= Source_Time]
 
 sol1 = solve_ivp(lambda t, C: pde_rhs(t, C, source_active=True),
-                 t_span1, Concentration_Init, t_eval=t_eval1, method='RK45')
+                 t_span1, Concentration_Init, t_eval=t_eval1, method='Radau')
 
 # The final state from the first stage is used as the initial condition for the second stage.
 Concentration_at_switch = sol1.y[:, -1].copy()

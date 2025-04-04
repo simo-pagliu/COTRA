@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Load the file
-data = np.load("output_data.npz")
+data = np.load("output_data_4.npz")
 
 # Extract variables (adjust key names if needed)
 t_full = data["t_full"]
