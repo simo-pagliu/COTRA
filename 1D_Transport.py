@@ -7,20 +7,20 @@ import glob
 import re
 
 # Input Parameters
-Hydro_Dispersion = 3.3e-6       # Hydrodynamic dispersion [m^2/s]
-pore_velocity = 1.0e-4          # Pore velocity [m/s]
-porosity = 0.30                 # Porosity
-bulk_density = 4                # Bulk density [kg/l]
+Hydro_Dispersion = 1.6306*1e-6       # Hydrodynamic dispersion [m^2/s]
+pore_velocity = 0.9734*1e-3          # Pore velocity [m/s]
+porosity = 0.4078                 # Porosity
+bulk_density = 1.48               # Bulk density [kg/l]
 
 # Source term parameters
-Source_Time = 10000             # Source duration [s]
+Source_Time = 480             # Source duration [s]
 Source_Intensity = 1            # Source intensity [g/l]
 
 # Discretization Settings
-Domain_Length = 1               # Domain length [m]
-dx = 0.005                    # Space discretization [m]
-Time_Span = (0, 20000)          # Total simulation time [s]
-dt = 40                       # Time step for evaluation [s]
+Domain_Length = 19.5e-2               # Domain length [m]
+dx = 1e-3                    # Space discretization [m]
+Time_Span = (0, 1200)          # Total simulation time [s]
+dt = 1                       # Time step for evaluation [s]
 
 # Create spatial grid
 Grid_Space = np.arange(0, Domain_Length + dx, dx)
@@ -53,7 +53,7 @@ def pde_rhs(t, C, source_active=True):
     if retardation == 1:
         R = 1 + k_1 * bulk_density / porosity  # linear model
     elif retardation == 2:
-        R = 1 + k_1 * bulk_density / porosity * (C ** (k_2 - 1))  # Freundlich model (use ** for exponentiation)
+        R = 1 + k_1 * bulk_density / porosity * (C ** (k_2 - 1))  # Freundlich model
     else:
         R = 1.0  # no retardation
 
