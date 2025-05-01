@@ -108,6 +108,7 @@ def CvT(files, *comments):
         line, = ax.plot(t_full, concentration_evolution, label=f'{comments[idx]}')
         lines.append(line)
 
+    ax.set_ylim(0, 1.1 * np.max(C_full))  # Set y-limits based on the maximum concentration
     ax.set_xlabel('Time [s]')
     ax.set_ylabel('Concentration [g/l]')
     ax.set_title(f'Concentration vs Time at x = {point:.2f} m')
