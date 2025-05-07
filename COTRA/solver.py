@@ -22,9 +22,9 @@ def run(Hydro_Dispersion, pore_velocity, porosity, bulk_density,
         C_ext[1:-1] = C
         C_ext[0] = C[1]  # Neumann at x=0 if no source, will be overridden if source_active
         C_ext[-1] = C[-2]  # Neumann at x=L
-
-        dC_dx = (C_ext[2:] - C_ext[:-2]) / (2 * dx)
-        d2C_dx2 = (C_ext[2:] - 2 * C_ext[1:-1] + C_ext[:-2]) / (dx ** 2)
+        
+        dC_dx = np.gradient(C, dx)
+        d2C_dx2 = np.gradient(dC_dx, dx)
 
         if retardation == 1:
             R = 1 + k_1 * bulk_density / porosity
