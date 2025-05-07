@@ -35,6 +35,7 @@ def run(Hydro_Dispersion, pore_velocity, porosity, bulk_density,
 
         dC_dt = (-pore_velocity * dC_dx + Hydro_Dispersion * d2C_dx2) / R
 
+        # Left boundary condition (Dirichlet)
         if source_active:
             dC_dt[0] = 0  # Hold C[0] fixed
             C[0] = Source_Intensity
@@ -105,3 +106,4 @@ def run(Hydro_Dispersion, pore_velocity, porosity, bulk_density,
             Grid_Space=Grid_Space)
 
     print(f"Data saved to {filename}")
+    return filename
