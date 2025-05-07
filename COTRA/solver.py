@@ -18,43 +18,6 @@ def run(Hydro_Dispersion, pore_velocity, porosity, bulk_density,
     Concentration_Init[0] = Source_Intensity
 
     def pde_rhs(t, C, source_active=True):
-        """
-        Right-hand side for the transport PDE using the method-of-lines.
-        PDE:
-            Retardation_Factor * dC/dt = pore_velocity * dC/dx + Hydro_Dispersion * d2C/dx2
-        Forcing is applied at the left boundary when source_active is True.
-        """
-        # Compute spatial derivatives using finite differences
-        dC_dx = np.gradient(C, dx)
-        d2C_dx2 = np.gradient(dC_dx, dx)
-        
-        # Compute the retardation factor (here a constant or dependent on C)
-        if retardation == 1:
-            R = 1 + k_1 * bulk_density / porosity  # linear model
-        elif retardation == 2:
-            R = 1 + k_1 * bulk_density / porosity * (C ** (k_2 - 1))  # Freundlich model
-        else:
-            R = 1.0  # no retardation
-
-        # Compute the right-hand side of the PDE
-        dC_dt = (-pore_velocity * dC_dx + Hydro_Dispersion * d2C_dx2) / R
-
-        # Left boundary condition (Dirichlet)
-        # If the source is active, enforce the boundary condition at x=0.
-        # Here we simply force the derivative at the first node to be zero so that the value remains constant.
-        if source_active:
-            C[0] = Source_Intensity  # This holds C[0] constant
-            dC_dt[0]=0
-        else:
-            C[0] = 0 
-            dC_dt[0]=0
-
-        # Right boundary condition (Neumann)
-        dC_dt[-1] = 0  # No flux at the right boundary (Neumann condition)
-        #C[-1] = C[-2]  # This holds C[-1] constant
-        return dC_dt
-
-    def pde_rhs(t, C, source_active=True):
         C_ext = np.zeros(Steps_Space + 2)
         C_ext[1:-1] = C
         C_ext[0] = C[1]  # Neumann at x=0 if no source, will be overridden if source_active
